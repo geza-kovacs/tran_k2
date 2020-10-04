@@ -1,0 +1,216 @@
+#!/bin/bash
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+# Plots 4-panels for the new candidates 
+#
+# INPUT:  - sp.dat           [BLS spectrum]
+#         - rec_tfa.dat      [reconstructed LC]
+#         - ts_4.dat         [needed ONLY for the target name]
+#         - tr1_fit.lc       [densely sampled transit fit]
+#
+# OUTPUT: - cand_4_plot.png
+#
+# DATE:   - 2020.05.25
+#           2020.06.14
+#           2020.09.06
+#
+# NOTES:  - run like: gnuplot cand_4_plot.sh
+#         - INPUT files are the outputs of "tran_k2"
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#
+# DERIVE PLOT files as follows
+#
+#-------------------------------------------------------
+# c5.dat = folded reconstructed data
+# c7.dat = trapezoidal fit (with U-shaped bottom) from the full model
+# OOT    = 0.0 in all cases
+#------------------------------------------------------- 
+#
+! grep -v "#" rec_tfa.dat > a_rec.dat
+! awk '{print $1"   "$2}' a_rec.dat > lc.dat
+! ./fold_k2_rr
+! cp fold.dat c5.dat
+! awk '{print $1"   "$2-$3}' a_rec.dat > lc.dat
+! ./fold_k2_rr
+! sort -gk 1 fold.dat > c7.dat
+#
+# TARGET name
+#
+! grep "TARGET" ts_4.dat > a.dat
+! awk '{print $3}' a.dat > sname.txt
+target=system('head -n 1 sname.txt')
+#
+# QTRAN 
+# 
+! grep "QTRAN" rec_tfa.dat > a.dat
+! awk '{print $4}' a.dat > qtran.txt
+qtran=system('head -n 1 qtran.txt')
+xmin2=-1.5*qtran
+xmax2=1.5*qtran
+#
+# OOT levels
+ppt=1000.0
+y_frac=0.07
+stats "c5.dat" using (ppt*$2) noout
+ymin=STATS_min
+ymax=STATS_max
+ymin4=ymin-2.0*y_frac*(ymax-ymin)
+ymax4=ymax+y_frac*(ymax-ymin)
+stats "c5.dat" using (ppt*$2) noout
+oot1=STATS_median
+oot2=0.0
+stats "c7.dat" using (ppt*$2) noout
+oot3=STATS_median
+#
+# Calculate RMS of the residuals (c7.dat)
+#
+stats "c7.dat" using (ppt*$2) noout
+rms=STATS_stddev
+rat=(ymax-ymin)/rms
+#
+#
+set term png size 1000,700 crop enhanced
+set output 'cand_4_plot.png'
+set multiplot layout 2,2
+#
+# SET point- and panel sizes, epoch
+#
+ps0=0.5
+if(ymin4-oot1 > 10) { ps0=1.0 } 
+x0=0.15
+y0=0.08
+yr=0.30
+xr=0.30
+dx=0.04
+dy=0.03
+t0=57139.610425
+#
+#*********************************
+#         BLS SPECTRUM           *
+#*********************************
+#
+set bmargin at screen y0+yr+dy
+set tmargin at screen y0+2*yr+dy
+set lmargin at screen x0
+set rmargin at screen x0+xr
+#
+stats "sp.dat" using 2 noout
+fx=1.0/STATS_max
+set yrange [ 0.02:1.09]
+set xrange [-0.03:1.53] 
+#
+unset key
+set border lc rgb "black"
+set border linewidth 1.0
+#
+set object 2 rect from graph 0,0 rto 1,1 fc rgb "black" fs solid 0.07 behind lw 0
+set label 1 target font "Helvetica-Bold, 18" at graph 0.55,0.88 front tc rgb "#1E90FF"
+#
+set ytics -0.3,0.2,1.30 font "Helvetica, 12"
+set ytics format '%3.1f' offset 1.0,0,0
+set mytics 2
+set xtics -2.0,0.5,60.0 font "Helvetica, 12"
+set xtics format '%3.1f' offset 0,0.5,0
+set mxtics 5
+#
+plot 'sp.dat' using 1:(fx*$2) with lines lw 1.5 lt -1 lc rgb "black"
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#**************************************************
+#         PLOT RECONSTRUCTED TRANSIT LC           *
+#**************************************************
+#
+set bmargin at screen y0+yr+dy
+set tmargin at screen y0+2*yr+dy
+set lmargin at screen x0+xr+dx
+set rmargin at screen x0+2*xr+dx
+#
+unset label
+unset ytics
+#
+set xrange [-4.0:82.0]  
+set xtics -20.0,20.0,120.0 font "Helvetica, 12"
+set xtics format '%3.0f' offset 0,0.5,0
+set mxtics 4
+#
+set yrange [ymin4:ymax4]
+#
+if(ymin4-oot1 < -9) { set ytics -30.0,5.0,30.0 font "Helvetica, 12"}
+if(ymin4-oot1 > -9) { set ytics -10.0,2.0,10.0 font "Helvetica, 12"}
+if(ymin4-oot1 > -5) { set ytics -6.0,1.0,6.0 font "Helvetica, 12"}
+if(ymin4-oot1 > -2) { set ytics -3.0,0.4,3.0 font "Helvetica, 12"}
+if(ymin4-oot1 > -1) { set ytics -3.0,0.2,3.0 font "Helvetica, 12"}
+if(ymin4-oot1 < -9) { set ytics format '%3.0f' offset 1,0,0 }
+if(ymin4-oot1 > -9) { set ytics format '%3.1f' offset 1,0,0 }
+set mytics 5
+if(ymin4-oot1 > -9) { set mytics 2 }
+#
+plot 'rec_tfa.dat' using ($1-t0):(ppt*$2-oot1) with points pt 7 ps ps0 lc rgb "#696969"
+#
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#**************************************************
+#     PLOT the RECONSTRUCTED/FOLDED TRANSIT LC    *
+#**************************************************
+#
+set bmargin at screen y0
+set tmargin at screen y0+yr
+set lmargin at screen x0
+set rmargin at screen x0+xr
+#
+set xrange [-0.52:0.52]
+set xtics -1.0,0.2,1.0 font "Helvetica, 12"
+set xtics format '%0.1f' offset 0,0.5,0
+set mxtics 2
+#
+plot 'c5.dat' using 1:(ppt*$2-oot1) with points pt 7 ps ps0 lc rgb "#696969",\
+     'tr1_fit.lc' using 1:(ppt*$2-oot2) with lines lw 2 lt -1 lc rgb "black"
+#
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#******************************************************
+#   PLOT the ZOOMED RECONSTRUCTED/FOLDED TRANSIT LC   *
+#******************************************************
+#
+set bmargin at screen y0
+set tmargin at screen y0+yr
+set lmargin at screen x0+xr+dx
+set rmargin at screen x0+2*xr+dx
+#
+zsh=8.0*rms/(ymax4-ymin4)
+pfac=2.0
+set xrange [xmin2:xmax2]
+set xtics -0.2,0.02,0.2 font "Helvetica, 12"
+if(xmax2-xmin2 < 0.04) { set xtics -0.2,0.01,0.2 font "Helvetica, 12"}
+if(xmax2-xmin2 > 0.06) { set xtics -0.2,0.02,0.2 font "Helvetica, 12"}
+if(xmax2-xmin2 > 0.10) { set xtics -0.2,0.05,0.2 font "Helvetica, 12"}
+set xtics format '%0.2f' offset 0,0.5,0
+set mxtics 2
+ymin5=ymin4
+ymax5=ymax4+zsh*(ymax4-ymin4)
+set yrange [ymin5:ymax5]
+yr5=ymin5-ymax5
+#
+if(yr5 < -9) { set ytics -30.0,5.0,30.0 font "Helvetica, 12"}
+if(yr5 > -9) { set ytics -10.0,2.0,10.0 font "Helvetica, 12"}
+if(yr5 > -5) { set ytics -6.0,1.0,6.0 font "Helvetica, 12"}
+if(yr5 > -2) { set ytics -3.0,0.4,3.0 font "Helvetica, 12"}
+if(yr5 > -1) { set ytics -3.0,0.2,3.0 font "Helvetica, 12"}
+if(yr5 < -9) { set ytics format '%3.0f' offset 1,0,0 }
+if(yr5 > -9) { set ytics format '%3.1f' offset 1,0,0 }
+set mytics 5
+if(yr5 > -9) { set mytics 2 }
+#
+plot 'c5.dat' using 1:(ppt*$2-oot1) with points pt 7 ps pfac*ps0 lc rgb "#696969",\
+     'tr1_fit.lc' using 1:(ppt*$2-oot2) with lines lw 3 lt -1 lc rgb "black",\
+     'c7.dat' using 1:(ppt*$2-oot3+zsh*(ymax4-ymin4)) with points pt 7 ps pfac*ps0 lc rgb "brown"
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+exit
+#

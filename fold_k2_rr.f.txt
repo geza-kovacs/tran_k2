@@ -1,0 +1,128 @@
+c
+c=====================================================================
+c     This code: computes folded LC from a simple 2-column file
+c=====================================================================
+c
+c     INPUT:  - lc.dat    [HJD FLUX]
+c             - fold.par  [target name 
+c                          folding period number
+c                          freq0
+c                          epoch]
+c
+c     OUTPUT: - fold.dat  [PHASE FLUX]
+c
+c     NOTE:   - If epoch<0, then, by taking MIN{x}, "epoch" is computed 
+c               in this routine  
+c
+c     DATE:   - 2018.03.29 
+c---------------------------------------------------------------------
+c
+      implicit real*8 (a-h,o-z)
+      implicit integer*4 (i-n)
+c
+      character*9 target
+      dimension t(20222),x(20222),tfold(20222)
+c
+c...  Read in folding parameters
+c
+      open(1,file='fold.par')
+      read(1,*) target
+      read(1,*) rper
+      read(1,*) freq0
+      read(1,*) epoch
+      close(1)
+c
+c...  Read in LC
+c
+      open(1,file='lc.dat')
+      n=0
+      t_min=0.0d0
+      x_min=1.0d30
+ 1    continue
+      n=n+1
+      read(1,*,end=2) t(n),x(n)
+      go to 1
+ 2    continue
+      n=n-1     
+      close(1)
+c
+      if(epoch.gt.0.0d0) go to 7
+c
+c...  Compute the time of MIN{x}
+c
+      epoch=0.0d0
+      x_min=1.0d30
+      do 8 i=1,n
+      if(x(i).gt.x_min) go to 8
+      x_min=x(i)
+      epoch=t(n)
+ 8    continue
+c      
+ 7    continue
+c
+c...  Compute zero-averaged LC
+c
+      s=0.0d0
+      do 5 i=1,n
+      s=s+x(i)
+ 5    continue
+      s=s/dfloat(n)
+      do 6 i=1,n
+      x(i)=x(i)-s
+ 6    continue     
+c
+c...  Fold LC
+c
+      p0=rper/freq0
+      call fold4(p0,epoch,n,t,tfold) 
+c
+c...  Save folded LC
+c
+      open(1,file='fold.dat')
+      do 3 i=1,n
+      write(1,4) tfold(i),x(i)
+ 4    format(f8.5,2x,f10.7)
+ 3    continue
+      close(1)     
+c
+      stop
+      end
+c
+c
+      subroutine fold4(p0,epoch,n,t,tfold) 
+c
+c*********************************************************************
+c     This routine computes folded time series
+c*********************************************************************
+c
+c     INPUT:    p0      -- folding period             
+c               epoch   -- Folding phase is computed by using moments 
+c                          of {t-epoch}
+c               n       -- Number of data points of the input time 
+c                          series
+c               {t}     -- Time values of the time series
+c
+c     OUTPUT:   {tfold} -- Phase values 
+c                          [tfold(i) is the phase of t(i)] 
+c---------------------------------------------------------------------
+c
+      implicit real*8 (a-h,o-z)
+      implicit integer*4 (i-n)
+c
+      dimension t(20222),tfold(20222)
+c
+c---------------------------------------------------------------------     
+c
+      f0   = 1.0d0/p0
+      do 3 i=1,n
+      ph = f0*(t(i)-epoch)
+      ph = ph - idint(ph)
+      if(ph.gt. 0.5d0) ph=ph-1.0d0      
+      if(ph.lt.-0.5d0) ph=ph+1.0d0      
+      tfold(i)=ph           
+ 3    continue
+c
+      return
+      end
+c
+c

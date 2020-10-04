@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# This script plots BLS spectra and folded LCs corresponding to the 
+# significant signal components
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+# DATE: 2020.09.04
+#
+# INPUT:  - mult_#.sh     [#=1,2,...,5]
+#         - sp0#.dat      [BLS spectrum of the #-th component]
+#         - tr#.lc        [decomposed, folded LC/fit of the #-th component]
+#         - tr#_fit.lc    [best-fitting trapezoidal]
+#         - multi_par.dat [parameters of the component candidates]
+#         - ts_4.dat      [needed ONLY for the target name]
+# 
+# OUTPUT: - mult_plot.png
+#
+# NOTE:   - Up to 5 components can be plotted
+#         - Input data are from the output files of "tran_k2_v0"
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+# Get the number of significant components
+#
+grep -v "#" multi_par.dat > a.dat
+wc -l a.dat > nr.dat
+read n c2 < nr.dat
+#
+n=5
+#
+if [ $n -eq 1 ]; then gnuplot mult_1.sh ; fi
+if [ $n -eq 2 ]; then gnuplot mult_2.sh ; fi
+if [ $n -eq 3 ]; then gnuplot mult_3.sh ; fi
+if [ $n -eq 4 ]; then gnuplot mult_4.sh ; fi
+if [ $n -eq 5 ]; then gnuplot mult_5.sh ; fi
+#
+exit
+#

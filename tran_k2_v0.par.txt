@@ -1,0 +1,65 @@
+#
+# ====================================================================
+# This is the input parameter file for code  'tran_k2_v0'
+#---------------------------------------------------------------------
+#  - Parameter description: see this file and the source code 
+#  - File format:           par. name : cols. 1-9
+#                           par value : cols. 11 - 27 
+#  - Data format:           No exponential and characters 
+#  - Comment lines:         They should start with #
+# ====================================================================
+#                          |Start of the comment lines
+isurvey  = 0               |1/0 : Flag for survey mode (yes/no)
+jsm      = 1               |1/0 : Single component TFA reconstruction (yes/no)
+itemp    = 1               |1=Use TFA templates; 0=Do NOT use TFA templates
+nstar    = 1               |Number of stars to be analyzed
+fmin1    = 0.0             |Frequency search parameters
+fmax1    = 1.5             |.
+nf1      = 30000           |.
+iwhite   = 0               |Successive transit search (yes/no = 1/0)
+nb       = 500             |BLS parameters
+qmi      = 0.005           |.
+qma      = 0.05            |.
+# -------------------------|-------------------------------------
+itest    = 1               |1 : 2 transits + SINUSOIDAL OOTV
+#                          |2 : 2 transits + RR Lyrae OOTV
+#                          |3 : 2 transits + SINUSOIDAL OOTV + edge transits
+#                          |4 : 2 transits + RR Lyrae OOTV + edge transits
+#                          |31: RR Lyr + 1 transit
+#                          |32: RR Lyr + 1 sine
+#..........................|.....................................
+tfreq0   = 0.09            |Frequency of the 1st transit
+dep0     = 0.005           |Depth of the 1st transit
+t14_0    = 0.20            |Transit length [d] of the 1st transit
+pht0     = 0.10            |Phase of the 1st transit [0,1]
+frin0    = 0.20            |Relative ingress duration of the 1st transit
+#..........................|.....................................
+tfreq1   = 0.7283          |Frequency of the 2nd transit
+dep1     = 0.00            |Depth of the 2nd transit
+t14_1    = 0.07            |Transit length [d] of the 2nd transit
+pht1     = 0.50            |Phase of the 2nd transit [0,1]
+frin1    = 0.00            |Relative ingress duration of the 2nd transit
+#..........................|.....................................
+frootv   = 0.13            |OOT frequency
+amootv   = 0.00            |OOT sinusoidal amplitude
+phootv   = 0.30            |OOT sinusoidal phase
+#..........................|.....................................
+iflare   = 0               |Include/not include (1/0) flares in the test data
+igen     = 0               |1=Add Gausian noise to the synthetic signal; 0=add input time series
+std      = 0.00001         |Standard deviation of the Gaussian noise, if igen=1
+fdep     = 0.00            |Transit depths are randomly changed by factors in [1-fdep,1+fdep]
+iseed    = 323             |Seed of the random number generator
+# -------------------------|-------------------------------------
+issp     = 1               |1=Save BLS spectrum; 0=do NOT save BLS spectrum
+isflc    = 1               |1=Save filtered LC;  0=do NOT save filtered LC 
+ispl     = 1               |1=Save plots in subdirectory plots/
+iplot    = 0               |1/0=Create plots (yes=1, no=0)
+#                          |0=do not save plots in subdirectory plots/ 
+asig     = 555.0           |General sigma clipping parameter
+ic_flare = 1               |Correct/not correct (1/0) for flares
+ibg      = 1               |Use/not use background flux for systematics filtering
+ixy      = 1               |Use/not use (X,Y) coordinates for systematics filtering
+# -------------------------|------------------------------------------
+m_four   = 50              |Order of the Fourier series for stellar variability
+m_opt    = 1               |0=Use m_four as given in this parameter file 
+#                          |1=Use optimized m_four
