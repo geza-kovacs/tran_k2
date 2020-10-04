@@ -1,0 +1,2 @@
+The paper associated with this code: https://arxiv.org/abs/2008.10075 (see also A&A for the journal version)
+The code can also be accessed from the following site: https://konkoly.hu/staff/kovacs/page2_2014.html 
