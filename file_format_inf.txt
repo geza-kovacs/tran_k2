@@ -1,0 +1,431 @@
+GENERAL NOTES:
+
+- To make the description simple we show the relevant parts of sample 
+  files and avoid byte-by-byte description if possible. Some formats 
+  are strict, some formats are free. 
+
+- To handle different formats for the light curves, one needs to change 
+  the input routines in "tran_k2_v0.f" accordingly.    
+
+- In the DESCRIPTION section we show either an arbitrary single line from 
+  the file or, if there is a header, then the header and the first data line. 
+  The same type of data lines are repeated for all stars entering in the 
+  given file. The excerpt from the file is bracketed by "----"
+
+- All input/output files are standard ASCII text files [except for the plot files]. 
+
+- Not all output files listed below are generated/modified after each run. 
+  The output file list is controlled by the setting of the parameter file 
+  "tran_k2_v0.par". 
+ 
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> INPUT FILES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+******************
+*  filename.lis  *
+******************
+
+PURPOSE:     IDs and paths of the stars to be analyzed 
+
+DESCRIPTION: - for LCs originating from the the Kepler pipeline:
+
+               -----------------------------------------------------------------
+	       211754117         LC/211754117-c05pdc.txt
+               -----------------------------------------------------------------
+
+             - for LCs originating from the the k2phot/TERRA 
+	       (by Petigura et al.) pipeline:
+
+               -----------------------------------------------------------------
+               211754117         LC/211754117-c05.txt 
+               -----------------------------------------------------------------
+
+FORMAT:      a9,9x,a20 
+             [i.e., 9 digits for the star ID, followed by 9 spaces and up 
+	     20 characters for the path]
+             File names in the subdirectory "LC" must have the 9-digit star 
+	     ID and the 3-character K2 campaign ID in the format shown. 
+	     It is recommended to have directory LC as a symbolic link to 
+	     the main database. 
+
+
+*************
+*  ref.pos  *
+************* 
+
+PURPOSE:     IDs, coordinates, and average magnitudes available in the database 
+
+DESCRIPTION: The columns are: |star ID| |RA| |DE| |Kp|
+
+               -----------------------------------------------------------------
+               211340040        125.98004    10.63206   5.83500
+               -----------------------------------------------------------------
+
+FORMAT:      free
+ 
+ 
+******************
+*  template.lis  *
+******************
+
+PURPOSE:     List of IDs and paths of the pre-selected stars constituting 
+             the TFA filter
+
+DESCRIPTION: - for LCs originating from the the Kepler pipeline:
+
+               -----------------------------------------------------------------
+               212138834         LC/212138834-c05pdc.txt     19
+               -----------------------------------------------------------------
+ 
+             - for LCs originating from the the k2phot/TERRA 
+	       (by Petigura et al.) pipeline:
+
+               -----------------------------------------------------------------
+               212138834         LC/212138834-c05.txt   19
+               -----------------------------------------------------------------
+
+FORMAT:      The same as for "filename.lis", but followed by an integer after 5 
+             (Kepler) or 3 (k2phot) spaces. These numbers originally show 
+	     the tile number, but they could be arbitrary, because they are 
+	     not used in the code. 
+
+
+******************
+*  LIGHT CURVES  *
+******************
+
+- for LCs originating from the the Kepler pipeline:
+  FORMAT:  Strict in the header (5 lines exactly, starting with #).
+           Free in all other data lines.
+	   These files are in a custom-made format from the original *.tbl 
+	   files downloaded from the NASA/IPAC exoplanet site. 
+	    
+               -----------------------------------------------------------------
+               #
+               # SAP/PDC photometry of EPIC-211609360
+               # SOURCE: EPIC/ExoFOP
+               #
+               #     BJD          FLUX_SAP       e_FLUX_SAP   FLUX_PDC      e_FLUX_PDC        X           Y          BG
+               2457139.631236  4816302.5000       57.3500  4816259.0000       56.6846      930.2307    446.0094  55062.8750
+               -----------------------------------------------------------------
+
+
+- for LCs originating from the the k2phot/TERRA pipeline:
+  FORMAT:  Strict in the header (40 lines exactly, starting with #).
+           Free in all other data lines. 
+	   Please note that these are the ORIGINAL files downloaded 
+	   from the NASA/IPAC/ExoFop site. 
+
+
+               -----------------------------------------------------------------
+               # Photometry of EPIC-211609360
+               # 
+               # Description
+               # 
+               #     This photometry was produced by Erik Petigura using the `k2phot`
+               #     code. We used a stationary 104.0 pixel aperture to
+               #     construct simple aperture photometry from the K2 target pixel
+               #     file. We then modeled time- and position-dependent photometric
+               #     variability. The size and shape of the aperture was chosen to
+               #     minimize noise on three-hour timescales.
+               # 
+               # Attribution
+               # 
+               #     If you use this photometry, please cite
+               # 
+               #     1. Petigura et al. 2015, ApJ, 811, 102
+               #     2. Aigrain et al. 2016, MNRAS, 459, 2408
+               # 
+               # Code Availability
+               # 
+               #     Public URL: https://github.com/petigura/k2phot
+               #     Version: v1.0
+               #     Git SHA: 0e63443fee2083618488daec2635a9d1af284731
+               # 
+               # Column Description
+               # 
+               #     t (float): Time [BJD_TDB]
+               #     cad (int): Unique cadence number
+               #     fbg (float): Background flux [e-/s/pixel]
+               #     fsap (float): Simple aperture photometry [e-/s]
+               #     fdt_t_rollmed (float): Flux after removing variability associated with
+               #          pixel position [e-/s]
+               #     fdt_t_roll_2D (float): Flux after removing variability associated with
+               #          pixel position and time [e-/s]
+               #     bgmask (bool): Outlier in background flux
+               #     thrustermask (bool): Thruster fire
+               #     fdtmask (bool): Observation excluded from Gaussian process model
+               #     fmask (bool): Observation ignored in transit search
+               #
+               # t,cad,fsap,fbg,fdt_t_rollmed,fdt_t_roll_2D,bgmask,thrustermask,fdtmask,fmask
+               2457139.610803,107552,4808099.732990,27.304028,4807929.998388,4810635.698561,False,False,False,False
+               -----------------------------------------------------------------
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> OUTPUT FILES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+            filename.lis : Updated target list
+            four_ord.dat : Statistical parameters obtained in the optimization of the Fourier order 
+                ts_4.dat : Non-reconstructed time series 
+             pre_bls.dat : Time series used in the BLS analysis
+               ts_ar.dat : Time series for testing the AR model at the edges 
+                  sp.dat : BLS compressed spectrum of the input data
+             outlier.dat : List of single outliers at various steps of analysis (see "NOTE on *outlier.dat*") 
+             rec_tfa.dat : Reconstructed time series (using the main component only)
+     sp00.dat - sp05.dat : BLS spectra from that of the input data (00) to the last prewhitening (05)
+     pa00.dat - pa05.dat : Folding parameters of the transit components found from the input data (00) to the last prewhitening (05) 
+     lc00.dat - lc05.dat : Time series derived at the various stages of the prewhitening process 
+           multi_bls.dat : Peak signal properties at the various stages of the prewhitening process
+        tr1.lc - tr5.lc  : Reconstructed time series derived for the individual transit components 
+tr1_fit.lc - tr5_fit.lc  : Transit model fits to tr1.lc - tr5.lc
+              tr_all.lc  : Reconstructed time series by using all significant transit components simultaneously 
+            test_par.dat : Test signal parameters ("nearly" the copy of the test section of the input parameter file) 
+           multi_par.dat : Component-by-component reconstructed transit signal properties
+                 snr.dat : Transit signal parameters of the main component of the signal analyzed
+              spec/*.sp  : Saved BLS spectra from the analysis of the input time series (*=star ID)
+               flc/*.lc  : Filtered, but non-reconstructed time series before the BLS analysis 
+         cand_4_plot.png : 4-panel diagnostic plot on the main transit component
+           mult_plot.png : Significant individual signal components (BLS spectra and folded LCs)
+             plots/*.png : Saved plots of the above type  
+
+
+NOTE on *outlier.dat*    : This file is generated FIRST by  "outlier_1g". Then, if "jsm=1" in 
+                           "tran_k2_v0.par", it is overwritten by "outlier_1m". 
+
+
+AUXILIARY files [i.e., temporal files generated during the run], listed for completeness: 
+
+temp.dat
+a_rec.dat
+c5.dat
+lc.dat
+fold.par
+fold.dat
+c7.dat
+qtran.txt
+nr.dat
+a.dat
+sname.txt 
+
+
+************************
+*  COLUMN description  *
+************************ 
+
+NOTES: - If the description below is not clear, please check the corresponding 
+         part of the code
+       - t0=2400000.0
+       - t1=first (smallest) BJD in the time series
+       - Column names (if any) in the individual files may differ from those 
+         shown in the table below. 
+
+======================================================================================================
+file/col#            1         2         3         4          5          6          7       8      9  
+------------------------------------------------------------------------------------------------------
+filename.lis        ID        path 
+four_ord.dat        mf        sig_mf    sig_lin   rat1        r2
+ts_4.dat            BJD-t0    RAW       RAW-TFA   RAW-FOUR    FLC        SYNT
+pre_bls.dat         BJD-t0    FLCA      XFA       WE
+ts_ar.dat           BJD-t1    RAW       X_fit     X_pred      X_Four     X_W
+sp.dat              Freq      BLS
+outlier.dat         BJD-t0    X         FX                                                   [jsm = 0]
+outlier.dat         BJD-t0    X         FX                                                   [jsm > 0]
+rec_tfa.dat         BJD-t0    X_REC     XFT       SYNT        SYN_TRAN   FOUR_REC   TFA_REC
+sp0#.dat            Freq      BLS
+pa0#.dat            ID        nper      Freq      Tc                    [this is row-wise in the file]
+lc0#.dat            BJD-t0    X_W       X_fit 
+multi_bls.dat       iw        f[1/d]    depth     qtran       Tc         N_intr     SNR     N_event
+tr#.lc              PH        XTR       XFT
+tr#_fit.lc          PH        XFT
+tr_all.lc           BJD-t0    XTR       XFT        
+test_par.dat        sname     tfreq0    dep0      t14_0       pht0       frin0      tfreq1  dep1   t14_1  pht1 frin1 amootv phootv frootv iflare igen std 1.0d0+rfac*fdep iseed0
+multi_par.dat       EPIC      f [c/d]   depth     t14/P       t12/t14    T_c-t0     DSP
+spec/*.sp           Freq      BLS
+flc/*.lc            BJD-t0    FLCA      XFA       TFATS
+snr.dat             SNAME     N         TOT       AVMAG       SIG_FINAL  F0         DEPTH   SNR    SPD   DSP  QTRAN      TCEN        NEV  NDIT SIG_FOUR  SIG_TFA   SNRT    FRET   RING   ITOC      F03    SNR03     F35    SNR35  M_FOUR
+          
+
+
+
+
+************************
+*  SYMBOL description  *
+************************ 
+
+%.......................................................................... filename.lis
+ID           = Star ID (i.e, EPIC number)
+path         = Path to the data file 
+%
+%.......................................................................... four_ord.dat
+mf           = Fourier order
+sig_mf       = Standard deviation of the Fourier fit of order "mf"
+sig_lin      = Linear fit to the high-mf part of the "sig_mf" function
+rat1         = Normalized difference between "sig_lin" and "sig_mf"
+r2           = The ratio of the observed variance (sig_mf**2) and the 
+               theoretical standard deviation of this variance.
+%
+%.......................................................................... ts_4.dat
+BJD-t0       = BJD, t0 subtracted
+RAW          = Raw (measured) flux
+RAW-TFA      = TFA-filtered flux  [no Fourier correction]
+RAW-FOUR     = FOUR-filtered flux [no TFA correction]
+FLC          = [TFA+FOUR]-filtered, non-reconstructed flux 
+               (FLC=RAW-TFA-FOUR)
+SYNT         = Synthetic test signal
+%
+%.......................................................................... pre_bls.dat
+BJD-t0       = BJD, t0 subtracted
+FLCA         = TFA+FOUR-filtered, non-reconstructed flux with AR 
+               approximation at the edges
+XFA          = Fourier fit with AR approximation at the edges
+WE           = Point-by-point weight used in the robust fit
+%
+%.......................................................................... ts_ar.dat
+BJD-t1       = BJD, t1 subtracted
+X_fit        = 1.0 at the edges, where the AR model is used, 
+               Fourier fit elsewhere    
+X_pred       = AR model at the edges, Fourier fit elsewhere 
+X_Four       = Fourier fit
+X_W          = RAW-X_pred-TFA, i.e, X_W is free from systematics and 
+               stellar variability 
+%
+%.......................................................................... sp.dat
+Freq         = Frequency [c/d]
+BLS          = BLS power 
+%
+%.......................................................................... outlier.dat [from outlier_1g]
+BJD-t0       = BJD, t0 subtracted
+XX           = RAW-TFA-FOUR (non-reconstructed, [FOUR+TFA]-filtered)
+X            = Corrected outlier value (= average of the neighbours)
+%
+%.......................................................................... outlier.dat [from outlier_1m]
+BJD-t0       = BJD, t0 subtracted
+X            = RAW-TFA-FOUR (reconstructed, [FOUR+TFA]-filtered data)
+FX           = Corrected outlier value (= best model value)
+%
+%.......................................................................... rec_tfa.dat
+BJD-t0       = BJD, t0 subtracted
+X_REC        = RAW-FOUR-TFA (reconstructed with the dominant transit)  
+XFT          = Best-fitting transit model to X_REC       
+SYNT         = Test signal (transit+other variations)
+SYN_TRAN     = Test transit signal (only)  
+FOUR_REC     = FOUR in the full (reconstructed) model  
+TFA_REC      = TFA  in the full (reconstructed) model
+%
+%.......................................................................... sp0#.dat
+Freq         = Frequency [c/d]
+BLS          = BLS power 
+%
+%.......................................................................... pa0#.dat
+ID           = Star ID (i.e, EPIC number) 
+nper         = Number of folding periods
+Freq         = Frequency [c/d]
+Tc           = Epoch of the center of the transit 
+%
+%.......................................................................... lc0#.dat
+BJD-t0       = BJD, t0 subtracted
+X_W          = Non-reconstructed, [TFA+FOUR]-filtered LC 
+TR_fit       = Best-fitting transit signal to X_W
+%
+%.......................................................................... multi_bls.dat
+iw           = Prewhitening cycle (iw=1 for the analysis of the RAW data)
+f[1/d]       = Peak frequency [c/d]
+depth        = Transit depth [relativ flux change, non-reconstructed]
+qtran        = Transit duration divided by the period
+Tc           = Center of the transit minus t0
+N_intr       = Total number of intransit data points
+SNR          = Signal-to-Noise-Ratio
+N_event      = Number of transit events 
+%
+%.......................................................................... tr#.lc 
+PH           = Phase       
+XTR          = Reconstructed time series for the #-th component
+XFT          = Best transit fit to XTR
+%
+%.......................................................................... tr#_fit.lc  
+PH           = Phase         
+XFT          = Best transit fit to XTR (close to the transit center)
+%
+%.......................................................................... tr_all.lc
+BJD-t0       = BJD, t0 subtracted   
+XTR          = Reconstructed time series including all components      
+XFT          = Best fit transit model including all components
+%
+%.......................................................................... test_par.dat 
+sname        = Star ID (i.e, EPIC number)
+tfreq0       = Frequency of the 1st transit
+dep0         = Depth of the 1st transit
+t14_0        = Transit length [d] of the 1st transit
+pht0         = Phase of the 1st transit [0,1]
+frin0        = Relative ingress duration of the 1st transit
+tfreq1       = Frequency of the 2nd transit
+dep1         = Depth of the 2nd transit
+t14_1        = Transit length [d] of the 2nd transit
+pht1         = Phase of the 2nd transit [0,1]
+frin1        = Relative ingress duration of the 2nd transit
+amootv       = OOT frequency
+phootv       = OOT sinusoidal amplitude
+frootv       = OOT sinusoidal phase
+iflare       = Include/not include (1/0) flares in the test data
+igen         = 1=Add Gausian noise to the synthetic signal; 
+               0=Add input time series
+std          = Standard deviation of the Gaussian noise, if igen=1
+dep_fac      = Transit depth modification factor: 
+               dep# --> dep_fac*dep#; # = 0,1
+iseed0       = Seed of the random number generator
+%
+%.......................................................................... multi_par.dat
+EPIC         = Star ID (i.e, EPIC number)        
+f [c/d]      = Peak frequency at the given prewhitening step     
+depth        = Transit depth (in the units of the relative flux)    
+t14/P        = Transit duration (in the units of the orbital period)    
+t12/t14      = Ingress duration over the total transit duration   
+T_c - t0     = BJD of the moment of the transit center, with t0 subtracted    
+DSP          = Dip significance parameter
+%
+%.......................................................................... spec/*.sp
+Freq         = Frequency [c/d]      
+BLS          = BLS power
+%
+%.......................................................................... flc/*.lc
+BJD-t0       = BJD, t0 subtracted      
+FLCA         = [TFA+FOUR]-filtered, non-reconstructed flux with AR 
+               approximation at the edges
+XFA          = Fourier fit with AR approximation at the edges
+TFATS        = TFA time series used in the derivation of FLCA
+%
+%.......................................................................... snr.dat
+SNAME        = Star ID (i.e, EPIC number)   
+N            = Total number of data points       
+TOT          = Total time span [d]    
+AVMAG        = Average Kp magnitude      
+SIG_FINAL    = Unbiased standard deviation of the residuals of 
+               RAW_LC - MODEL_LC  
+F0           = Peak frequency [c/d]      
+DEPTH        = Transit depth (relative flux units)   
+SNR          = Signal-to-Noise Ratio of the peak in the BLS spectrum    
+SPD          = Spectral Peak Density  
+DSP          = Dip Significance Parameter 
+QTRAN        = Relative transit duration (t14/P)     
+TCEN         = BJD-t0 of the transit center       
+NEV          = Number of the transit events
+NDIT         = Number of in-transit data points including all events 
+SIG_FOUR     = Standard deviation of the non-reconstructed Fourier 
+               component (with a possible AR component at the edges) 
+SIG_TFA      = Standard deviation of the non-reconstructed TFA component 
+SNRT         = SNR of the Fourier spectrum of the OOT section of the 
+               folded LC by the period of the transit (1/F0)  
+FRET         = Peak frequency of the above OOT spectrum  
+RING         = Ingress duration over full transit duration (t12/t14)  
+ITOC         = Transit Occupation Code     
+F03          = Fourier peak frequency in [0,3] c/d for the 
+               [FOUR+TFA]-filtered, non-reconstructed time series  
+SNR03        = SNR of the peak in the above spectrum     
+F35          = Fourier peak frequency in [3,5] c/d for the 
+               [FOUR+TFA]-filtered, non-reconstructed time series   
+SNR35        = SNR of the peak in the above spectrum  
+M_FOUR       = Order of the FOUR component of the signal
+%
+%..........................................................................
