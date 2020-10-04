@@ -36,5 +36,5 @@ DATA files:                     as given by "filename.lis"
 
 ADDITIONAL codes to the above:  fold_k2_rr.f
                                 cand_4_plot.sh
-				                        mult_plot.sh
-				                        mult_1.sh - mult_5.sh
+				mult_plot.sh
+				mult_1.sh - mult_5.sh
