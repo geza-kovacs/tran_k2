@@ -1,0 +1,40 @@
+=========================================================================
+WARNINGS/RECOMMENDATIONS:
+ 
+- The code uses standard FORTRAN 77 language and is written in a simple 
+  way (i.e., many features could be simplified, but we avoided in doing 
+  so and focused on functionality rather than (quasi)fanciness). 
+
+- Perform AS MANY TESTS AS NEEDED to check that the code works properly. 
+
+- Read also the comments in the code if you encounter difficulties in 
+  understanding the result.  
+
+=========================================================================
+
+
+SOFTWARE ENVIRONMENT: Standard GNU FORTRAN and GNUPLOT
+
+COMPILATION (e.g.):   gfortran -O1 -fno-f2c -Wall tran_k2_v0.f
+
+
+**************************
+*  BASIC run [no plots]  *
+**************************
+
+CODES required:                 tran_k2_v0.f 
+PARAMETER file:                 tran_k2_v0.par   [set  iplot=0]
+TARGET list:                    filename.lis
+TFA template list:              template.lis     [the "400 template" as used in the paper]
+ALL-star list:                  ref.pos
+DATA files:                     as given by "filename.lis"     
+
+
+*******************************
+*  STANDARD run [with plots]  * 
+*******************************
+
+ADDITIONAL codes to the above:  fold_k2_rr.f
+                                cand_4_plot.sh
+				                        mult_plot.sh
+				                        mult_1.sh - mult_5.sh
